@@ -8,11 +8,16 @@
 // Tyler Wayne © 2021
 //
 
+// TODO: add argopts
+// TODO: have digits be an optional flag
+
 #include <stdio.h>
-#include <stdlib.h> // srand, rand, abs, EXIT_FAILURE
-#include <time.h>   // time
-#include <math.h>   // pow, fmax, fmin
-#include <string.h> // strcmp
+#include <stdlib.h>      // srand, rand, abs, EXIT_FAILURE
+#include <time.h>        // time
+#include <math.h>        // pow, fmax, fmin
+#include <string.h>      // strcmp
+#include "configparse.h" // configparse
+#include "dict.h"        // Dict_T, dict_new, dict_get
 
 enum ops { ADD, SUB, MUL, DIV };
 
@@ -30,12 +35,12 @@ double add(int digits, int n) {
 
   int answer = 0;
 
-  printf("(+)\n");
+  printf("(+)\n\n");
 
   for (int i=0; i<n; i++) {
     int tmp = rand() % (int) pow(10, digits);
     answer += tmp;
-    printf("%d\n", tmp);
+    printf("%d\n\n", tmp);
   }
 
   return answer;
@@ -43,13 +48,20 @@ double add(int digits, int n) {
 }
 
 double sub(int digits, int n) {
-  
-  int x = rand() % (int) pow(10, digits);
-  int y = rand() % (int) pow(10, digits);
 
-  printf("%d - %d ?\n", x, y);
+  if (digits < 2) digits = 2;
 
-  return x - y;
+  int answer = rand() % (int) pow(10, digits+1);
+  printf("(-)\n\n");
+  printf("%d\n\n", answer);
+
+  for (int i=1; i<n; i++) {
+    int tmp = rand() % (int) pow(10, digits);
+    answer -= tmp;
+    printf("%d\n\n", tmp);
+  }
+
+  return answer;
 
 }
 
@@ -77,12 +89,28 @@ double divide(int digits) {
 
 int main(int argc, char **argv) {
 
+  // Default configurations
+  int add_digits = 7;
+  int add_nums = 8;
+  int sub_digits = 7;
+  int sub_nums = 7;
+
+  // User-configurations
+  Dict_T configs = dict_new();
+  FILE *fd = fopen("config.txt", "r");
+  if (fd) {
+    configparse(configs, fd);
+    char *tmp;
+    if ((tmp = dict_get(configs, "add_digits"))) add_digits = atoi(tmp);
+    if ((tmp = dict_get(configs, "add_nums"))) add_nums = atoi(tmp);
+    if ((tmp = dict_get(configs, "sub_digits"))) sub_digits = atoi(tmp);
+    if ((tmp = dict_get(configs, "sub_nums"))) sub_nums = atoi(tmp);
+  }
+
+  // Command-line arguments
   int op;
   unsigned int seed = time(NULL);
   srand(seed);
-
-  // TODO: add argopts
-  // TODO: have digits be an optional flag
 
   if (argc == 1) {
     int rnd = rand() % 4;
@@ -103,11 +131,12 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Invalid selection. Options are add, sub, mul, div\n");
     exit(EXIT_FAILURE);
   }
+  
 
   double answer;
   switch (op) {
-    case ADD: answer = add(7, 4); break;
-    case SUB: answer = sub(7, 1); break;
+    case ADD: answer = add(add_digits, add_nums); break;
+    case SUB: answer = sub(sub_digits, sub_nums); break;
     case MUL: answer = mul(3);    break;
     case DIV: answer = divide(2); break;
   }
