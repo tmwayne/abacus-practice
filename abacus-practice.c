@@ -40,7 +40,7 @@ double add(int digits, int n) {
   for (int i=0; i<n; i++) {
     int tmp = rand() % (int) pow(10, digits);
     answer += tmp;
-    printf("%d\n\n", tmp);
+    printf("%*d\n\n", digits, tmp);
   }
 
   return answer;
@@ -53,12 +53,12 @@ double sub(int digits, int n) {
 
   int answer = rand() % (int) pow(10, digits+1);
   printf("(-)\n\n");
-  printf("%d\n\n", answer);
+  printf("%*d\n\n", digits+1, answer);
 
   for (int i=1; i<n; i++) {
     int tmp = rand() % (int) pow(10, digits);
     answer -= tmp;
-    printf("%d\n\n", tmp);
+    printf("%*d\n\n", digits+1, tmp);
   }
 
   return answer;
@@ -91,9 +91,9 @@ int main(int argc, char **argv) {
 
   // Default configurations
   int add_digits = 7;
-  int add_nums = 8;
+  int add_nums = 4;
   int sub_digits = 7;
-  int sub_nums = 7;
+  int sub_nums = 4;
 
   // User-configurations
   Dict_T configs = dict_new();
@@ -132,7 +132,9 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   
+  time_t start = time(NULL);
 
+  // TODO: refactor this and turn into a function
   double answer;
   switch (op) {
     case ADD: answer = add(add_digits, add_nums); break;
@@ -141,21 +143,19 @@ int main(int argc, char **argv) {
     case DIV: answer = divide(2); break;
   }
 
-  char *line = NULL;
-  size_t len = 0;
-  ssize_t nread;
-  while((nread = getline(&line, &len, stdin)) != -1) {
-    switch (op) {
-      case ADD: case SUB: case MUL:
-        printf("= %0.f\n", answer);
-        break;
-      case DIV: 
-        printf("= %.4f\n", answer);
-        break;
-    }
-    break;
+  while (getchar()) break;
+
+  switch (op) {
+    case ADD: case SUB: case MUL:
+      printf("= %0.f\n", answer);
+      break;
+    case DIV: 
+      printf("= %.4f\n", answer);
+      break;
   }
 
-  free(line);
+  time_t elapsed = time(NULL) - start;
+  printf("It took you %ld seconds...\n", elapsed);
+
 
 }
